@@ -48,22 +48,20 @@ ALTER TABLE friendship
   ADD CONSTRAINT likes_target_id_fk 
     FOREIGN KEY (target_id) REFERENCES users(id);   
 
--- 3.Определим кто больше поставил лайков (всего) - мужчины или женщины (для получения разбивки по всем полам достаточно будет убрать LIMIT 1 из запроса):   
+-- 3.Определить кто больше поставил лайков (всего) - мужчины или женщины?   
 SELECT 
   (SELECT gender from profiles WHERE profiles.user_id = likes.user_id) AS gender,
   COUNT(*) AS 'Number of likes'
     FROM likes 
     GROUP BY gender
     ORDER BY COUNT(*) DESC LIMIT 1;
--- 4.Подсчитать количество лайков, которые получили десять самых молодых пользователей:
+-- 4.Вывести для каждого пользователя количество созданных сообщений, постов, загруженных медиафайлов и поставленных лайков.
 SELECT
-  target_id,
- (SELECT(CONCAT(first_name, ' ', last_name)) FROM users WHERE users.id = likes.target_id) AS name,
- (SELECT birthday from profiles WHERE profiles.user_id = likes.target_id) AS birthday,
-  COUNT(*) AS 'Number of likes'  
-FROM likes WHERE target_type = 2
-GROUP BY target_id
-ORDER BY birthday DESC LIMIT 10;
+ CONCAT(first_name, ' ', last_name) AS name,
+ (SELECT COUNT(*) from messages WHERE messages.from_user_id = users.id) AS messages,
+ (SELECT COUNT(*) from posts WHERE posts.user_id = users.id) AS posts,
+ (SELECT COUNT(*) from media WHERE media.user_id = users.id) AS media,
+ (SELECT COUNT(*) from likes WHERE likes.user_id = users.id) AS likes 
+FROM users LIMIT 10;
    
-  
    
