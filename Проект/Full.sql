@@ -206,10 +206,11 @@ order by operations.warehouse_id,operations.nomenclature_id,operations.series_id
 
 CREATE OR REPLACE VIEW last_user_of_nomenclature_type AS
 SELECT DISTINCT 
-	nomenclature.nomenclature_type_id,
-	FIRST_VALUE(operations.user_id) OVER(PARTITION BY nomenclature.nomenclature_type_id Order BY documents.date_document DESC) as last_user
+	(select name from nomenclature_types WHERE id = nomenclature.nomenclature_type_id) as nomenclature_type,
+	FIRST_VALUE(CONCAT(users.first_name, ' ', users.last_name)) OVER(PARTITION BY nomenclature.nomenclature_type_id Order BY documents.date_document DESC) as last_user_name
 FROM operations left join nomenclature on operations.nomenclature_id = nomenclature.id 
 				left join documents    on operations.document_id = documents.id 
+				left join users		   on operations.user_id = users.id 
 WHERE nomenclature.nomenclature_type_id IN (SELECT 
 	Nom_direction.nomenclature_type_id
 FROM (SELECT 	DISTINCT
